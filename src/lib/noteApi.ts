@@ -2,11 +2,21 @@ import type { Note } from '@/src/types/note'
 
 const BASE_URL = 'https://684ed48bf0c9c9848d293c41.mockapi.io/api/v1'
 
+interface GetNotesResponse {
+  notes: Note[]
+  page: number
+  hasNextPage: boolean
+}
+
 export class NotesApi {
   /**
    * Fetch all notes with optional search and pagination
    */
-  static async getNotes(page = 1, limit = 20, search = '') {
+  static async getNotes(
+    page = 1,
+    limit = 10,
+    search = ''
+  ): Promise<GetNotesResponse> {
     try {
       let url = `${BASE_URL}/notes?page=${page}&limit=${limit}&sortBy=createdAt&order=desc`
 
@@ -19,8 +29,13 @@ export class NotesApi {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
 
-      const data = await response.json()
-      return data
+      const notes = await response.json()
+      console.log('notes received from api call', notes)
+      return {
+        notes,
+        page,
+        hasNextPage: notes.length === limit,
+      }
     } catch (error) {
       console.error('Error fetching notes:', error)
       throw error
@@ -30,7 +45,7 @@ export class NotesApi {
   /**
    * Create a new note
    */
-  static async createNote(noteData: Note) {
+  static async createNote(noteData: Note): Promise<Note> {
     try {
       const response = await fetch(`${BASE_URL}/notes`, {
         method: 'POST',
@@ -58,7 +73,7 @@ export class NotesApi {
   /**
    * Update an existing note
    */
-  static async updateNote(id: string, noteData: Note) {
+  static async updateNote(id: string, noteData: Note): Promise<Note> {
     try {
       const response = await fetch(`${BASE_URL}/notes/${id}`, {
         method: 'PUT',
@@ -85,7 +100,7 @@ export class NotesApi {
   /**
    * Delete a note
    */
-  static async deleteNote(id: string) {
+  static async deleteNote(id: string): Promise<boolean> {
     try {
       const response = await fetch(`${BASE_URL}/notes/${id}`, {
         method: 'DELETE',

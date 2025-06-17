@@ -1,46 +1,6 @@
 <script lang="ts">
-  const notes = [
-    {
-      title: 'Meeting Notes',
-      content:
-        'Discuss project timeline and deliverables for Q2. Need to follow up with design team.',
-      date: '2024-03-20',
-      tags: ['work', 'meeting'],
-    },
-    {
-      title: 'Shopping List',
-      content: 'Milk, eggs, bread, vegetables, fruits, and cleaning supplies.',
-      date: '2024-03-19',
-      tags: ['personal', 'shopping'],
-    },
-    {
-      title: 'Book Recommendations',
-      content: '1. Atomic Habits\n2. Deep Work\n3. The Psychology of Money',
-      date: '2024-03-18',
-      tags: ['books', 'reading'],
-    },
-    {
-      title: 'Project Ideas',
-      content:
-        'Build a note-taking app with real-time collaboration features and markdown support.',
-      date: '2024-03-17',
-      tags: ['project', 'ideas'],
-    },
-    {
-      title: 'Fitness Goals',
-      content:
-        'Weekly workout plan:\n- Monday: Cardio\n- Wednesday: Strength\n- Friday: Yoga',
-      date: '2024-03-16',
-      tags: ['fitness', 'goals'],
-    },
-    {
-      title: 'Recipe Collection',
-      content:
-        'Pasta Carbonara:\n- Spaghetti\n- Eggs\n- Pancetta\n- Parmesan\n- Black pepper',
-      date: '2024-03-15',
-      tags: ['food', 'recipe'],
-    },
-  ]
+  import { useInfiniteNotes } from '$lib/hooks/useNotes'
+  const notesQuery = useInfiniteNotes()
 </script>
 
 <div class="flex flex-row">
@@ -60,16 +20,36 @@
     <div
       class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
     >
-      {#each notes as note}
-        <div class="break-inside-avoid rounded-2xl bg-white p-4 shadow-md">
-          <h2 class="mb-2 text-lg font-semibold">{note.title}</h2>
-          <p
-            class="max-h-[calc(100vh-50vh)] overflow-y-scroll text-sm text-gray-700"
-          >
-            {note.content}
-          </p>
-        </div>
-      {/each}
+      {#if $notesQuery.data}
+        {#each $notesQuery.data.pages as page}
+          {#each page.notes as note}
+            <div class="break-inside-avoid rounded-2xl bg-white p-4 shadow-md">
+              <h2 class="mb-2 text-lg font-semibold">{note.title}</h2>
+              <p
+                class="max-h-[calc(100vh-50vh)] overflow-y-scroll text-sm text-gray-700"
+              >
+                {note.content}
+              </p>
+            </div>
+          {/each}
+        {/each}
+      {/if}
     </div>
+
+    {#if $notesQuery.hasNextPage}
+      <div class="flex justify-center mt-8">
+        <button
+          class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          on:click={() => $notesQuery.fetchNextPage()}
+          disabled={$notesQuery.isFetchingNextPage}
+        >
+          {#if $notesQuery.isFetchingNextPage}
+            Loading...
+          {:else}
+            Load More
+          {/if}
+        </button>
+      </div>
+    {/if}
   </main>
 </div>

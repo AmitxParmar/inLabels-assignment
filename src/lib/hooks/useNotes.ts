@@ -1,41 +1,62 @@
 import {
   createQuery,
   createMutation,
-  queryClient,
+  createInfiniteQuery,
+  useQueryClient,
 } from '@tanstack/svelte-query'
-import { NotesApi } from '@/src/api/api' // adjust path
 import type { Note } from '@/src/types/note'
+import { NotesApi } from '$lib/noteApi'
+
+type NotesResponse = {
+  notes: Note[]
+  page: number
+  hasNextPage: boolean
+}
 
 export function useNotes(page = 1, limit = 20, search = '') {
-  return createQuery(['notes', page, limit, search], () =>
-    NotesApi.getNotes(page, limit, search)
-  )
+  return createQuery<NotesResponse>({
+    queryKey: ['notes', page, limit, search],
+    queryFn: () => NotesApi.getNotes(page, limit, search),
+  })
+}
+
+export function useInfiniteNotes(limit = 20, search = '') {
+  return createInfiniteQuery<NotesResponse>({
+    queryKey: ['notes', limit, search],
+    queryFn: ({ pageParam = 1 }) =>
+      NotesApi.getNotes(Number(pageParam), limit, search),
+    getNextPageParam: (lastPage) =>
+      lastPage.hasNextPage ? lastPage.page + 1 : undefined,
+    initialPageParam: 1,
+  })
 }
 
 export function useCreateNote() {
-  return createMutation({
-    mutationFn: (noteData: Note) => NotesApi.createNote(noteData),
+  const queryClient = useQueryClient()
+  return createMutation<Note, Error, Note>({
+    mutationFn: (noteData) => NotesApi.createNote(noteData),
     onSuccess: () => {
-      queryClient.invalidateQueries(['notes'])
+      queryClient.invalidateQueries({ queryKey: ['notes'] })
     },
   })
 }
 
 export function useUpdateNote() {
-  return createMutation({
-    mutationFn: ({ id, data }: { id: string; data: Note }) =>
-      NotesApi.updateNote(id, data),
+  const queryClient = useQueryClient()
+  return createMutation<Note, Error, { id: string; data: Note }>({
+    mutationFn: ({ id, data }) => NotesApi.updateNote(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries(['notes'])
+      queryClient.invalidateQueries({ queryKey: ['notes'] })
     },
   })
 }
 
 export function useDeleteNote() {
-  return createMutation({
-    mutationFn: (id: string) => NotesApi.deleteNote(id),
+  const queryClient = useQueryClient()
+  return createMutation<boolean, Error, string>({
+    mutationFn: (id) => NotesApi.deleteNote(id),
     onSuccess: () => {
-      queryClient.invalidateQueries(['notes'])
+      queryClient.invalidateQueries({ queryKey: ['notes'] })
     },
   })
 }
