@@ -1,0 +1,11 @@
+<script lang="ts">
+  import Header from './components/common/Header.svelte'
+  import Dashboard from './pages/Dashboard.svelte'
+</script>
+
+<div class="flex flex-col min-h-screen bg-secondary">
+  <Header />
+  <main class="flex-1">
+    <Dashboard />
+  </main>
+</div>
