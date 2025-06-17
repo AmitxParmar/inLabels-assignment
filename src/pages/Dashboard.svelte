@@ -1,6 +1,10 @@
 <script lang="ts">
   import { useInfiniteNotes } from '$lib/hooks/useNotes'
+
+  import type { Note } from '@/src/types/note'
+  import NoteForm from '../components/NoteForm.svelte'
   const notesQuery = useInfiniteNotes()
+  let selectedNote: Note | null = null
 </script>
 
 <div class="flex flex-row">
@@ -16,17 +20,27 @@
       </div>
     </div>
   </aside>
-  <main class="w-full min-h-full p-4">
+  <main
+    class="w-full min-h-full p-4 max-h-[calc(100vh-10vh)] overflow-y-scroll"
+  >
     <div
       class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
     >
       {#if $notesQuery.data}
         {#each $notesQuery.data.pages as page}
           {#each page.notes as note}
-            <div class="break-inside-avoid rounded-2xl bg-white p-4 shadow-md">
+            <div
+              class="break-inside-avoid rounded-2xl p-4 shadow-md relative group"
+              style="background-color: {note.color}"
+            >
+              <div
+                class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <NoteForm mode="edit" initialData={note} />
+              </div>
               <h2 class="mb-2 text-lg font-semibold">{note.title}</h2>
               <p
-                class="max-h-[calc(100vh-50vh)] overflow-y-scroll text-sm text-gray-700"
+                class="max-h-[calc(100vh-50vh)] overflow-y-auto scrollbar scrollbar-thumb-black text-sm text-gray-700"
               >
                 {note.content}
               </p>

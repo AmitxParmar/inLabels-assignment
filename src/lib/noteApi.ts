@@ -52,11 +52,7 @@ export class NotesApi {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          title: noteData.title,
-          content: noteData.content,
-          createdAt: new Date().toISOString(),
-        }),
+        body: JSON.stringify({ ...noteData }),
       })
 
       if (!response.ok) {

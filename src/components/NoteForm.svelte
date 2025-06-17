@@ -3,7 +3,6 @@
   import { Dialog, DialogContent, Trigger } from './ui/dialog'
   import { Input } from './ui/input'
   import { Textarea } from './ui/textarea'
-  /* import { Switch } from './ui/switch' */
   import {
     Select,
     SelectContent,
@@ -15,19 +14,34 @@
   import { Button } from './ui/button'
   import { formSchema } from '$lib/schema/noteFormSchema'
   import { colors } from '$lib/utils'
-  import { NotesApi } from '$lib/noteApi'
+  import { useCreateNote, useUpdateNote } from '$lib/hooks/useNotes'
+  import type { Note } from '@/src/types/note'
+
+  export let mode: 'create' | 'edit' = 'create'
+  export let initialData: Note | null = null
 
   // Local state for form data
-  let noteData: z.infer<typeof formSchema> = {
-    title: '',
-    content: '',
-    color: '#F8F9FA',
-    category: 'work',
-    isPinned: false,
-  }
+  let noteData: z.infer<typeof formSchema> = initialData
+    ? {
+        title: initialData.title || '',
+        content: initialData.content || '',
+        color: (initialData.color as typeof noteData.color) || '#F8F9FA',
+        category: initialData.category || 'work',
+        isPinned: initialData.isPinned || false,
+      }
+    : {
+        title: '',
+        content: '',
+        color: '#F8F9FA',
+        category: 'work',
+        isPinned: false,
+      }
 
   // Local validation errors
   let validationErrors: Partial<Record<keyof typeof noteData, string[]>> = {}
+
+  const createNote = useCreateNote()
+  const updateNote = useUpdateNote()
 
   function validateField(field: keyof typeof noteData) {
     const result = formSchema.safeParse(noteData)
@@ -46,7 +60,7 @@
     validationErrors = { ...validationErrors }
   }
 
-  function handleSubmit(event: MouseEvent): void {
+  async function handleSubmit(event: MouseEvent): Promise<void> {
     event.preventDefault()
     const result = formSchema.safeParse(noteData)
     if (!result.success) {
@@ -61,27 +75,24 @@
       })
       return
     }
-    try {
-      NotesApi.createNote(noteData).then((data) => {
-        // Show success alert
-        console.log('success data received from the api', data)
-        alert('Note saved successfully!')
-      })
-    } catch (error) {
-      console.log('error', error)
-      return
-    }
-    // Clear errors and proceed with valid data
-    validationErrors = {}
-    console.log('Valid Note:', result.data)
 
-    // Reset form after successful submission
-    noteData = {
-      title: '',
-      content: '',
-      color: '#F8F9FA',
-      category: 'work',
-      isPinned: false,
+    try {
+      if (mode === 'create') {
+        await $createNote.mutateAsync(noteData)
+      } else if (mode === 'edit' && initialData) {
+        await $updateNote.mutateAsync({ id: initialData.id, data: noteData })
+      }
+      // Reset form after successful submission
+      noteData = {
+        title: '',
+        content: '',
+        color: '#F8F9FA',
+        category: 'work',
+        isPinned: false,
+      }
+      validationErrors = {}
+    } catch (error) {
+      console.error('Error saving note:', error)
     }
   }
 
@@ -97,12 +108,21 @@
 
 <Dialog>
   <Trigger class="w-full">
-    <Button
-      class="flex flex-row items-center justify-start gap-2 cursor-text hover:bg-accent shadow-none text-muted-foreground min-w-full bg-white"
-    >
-      <Pen class="text-muted-foreground w-4 h-4" />
-      <span>Add note...</span>
-    </Button>
+    {#if mode === 'create'}
+      <Button
+        class="flex flex-row items-center justify-start gap-2 cursor-text hover:bg-accent shadow-none text-muted-foreground min-w-full bg-white"
+      >
+        <Pen class="text-muted-foreground w-4 h-4" />
+        <span>Add note...</span>
+      </Button>
+    {:else}
+      <Button
+        class="flex flex-row items-center justify-start gap-2 hover:bg-accent shadow-none text-muted-foreground"
+      >
+        <Pen class="text-muted-foreground w-4 h-4" />
+        <span>Edit</span>
+      </Button>
+    {/if}
   </Trigger>
 
   <DialogContent class="sm:max-w-[425px]">
@@ -237,23 +257,22 @@
           {/if}
         </div>
       </div>
-
-      <!-- Pin -->
-      <!--  <div class="flex items-center space-x-2">
-          <Switch bind:checked={noteData.isPinned} id="isPinned" />
-          <label
-            for="isPinned"
-            class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-          >
-            Pin Note
-          </label>
-        </div> -->
     </div>
 
     <div class="flex justify-end">
-      <Button disabled={!isFormValid} type="button" onclick={handleSubmit}
-        >Save Note</Button
+      <Button
+        disabled={!isFormValid ||
+          $createNote.isPending ||
+          $updateNote.isPending}
+        type="button"
+        onclick={handleSubmit}
       >
+        {#if mode === 'create'}
+          {$createNote.isPending ? 'Saving...' : 'Save Note'}
+        {:else}
+          {$updateNote.isPending ? 'Saving...' : 'Update Note'}
+        {/if}
+      </Button>
     </div>
   </DialogContent>
 </Dialog>
