@@ -11,7 +11,7 @@
   })
   onDestroy(() => unsubscribe())
   console.log('search reachjing dashboarad')
-  const notesQuery = useInfiniteNotes(20, search)
+  $: notesQuery = useInfiniteNotes(20, search)
 </script>
 
 <div class="flex flex-row">
