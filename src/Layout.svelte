@@ -3,7 +3,9 @@
   import Dashboard from './pages/Dashboard.svelte'
 </script>
 
-<div class="flex flex-col min-h-screen bg-secondary">
+<div
+  class="flex flex-col min-w-screen max-w-screen min-h-screen overflow-hidden bg-secondary"
+>
   <Header />
   <main class="flex-1">
     <Dashboard />

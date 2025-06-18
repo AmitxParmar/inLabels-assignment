@@ -9,7 +9,7 @@ export const formSchema = z.object({
     '#D3F9D8',
     '#FFE3E3',
     '#E7F5FF',
-    '#F3F0FF',
+    '#F3E5F5',
   ]),
   category: z.enum(['work', 'personal', 'ideas']),
   isPinned: z.boolean(),

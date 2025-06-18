@@ -5,7 +5,7 @@ export type Note = {
   avatar?: string
   title: string
   content: string
-  color: '#F8F9FA' | '#FFF3BF' | '#D3F9D8' | '#FFE3E3' | '#E7F5FF' | '#F3F0F0'
+  color: '#F8F9FA' | '#FFF3BF' | '#D3F9D8' | '#FFE3E3' | '#E7F5FF' | '#F3E5F5'
   category?: 'work' | 'personal' | 'ideas'
   isPinned?: boolean
 }

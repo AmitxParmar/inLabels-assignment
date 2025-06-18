@@ -22,5 +22,5 @@ export const colors = {
   softGreen: '#D3F9D8',
   softRed: '#FFE3E3',
   softBlue: '#E7F5FF',
-  softPurple: '#F3F0FF',
+  softPurple: '#F3E5F5',
 }

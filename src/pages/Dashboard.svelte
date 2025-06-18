@@ -1,14 +1,21 @@
 <script lang="ts">
+  import NoteCard from '../components/NoteCard.svelte'
   import { useInfiniteNotes } from '$lib/hooks/useNotes'
+  import { searchTerm } from '../stores/search'
+  import { onDestroy } from 'svelte'
 
-  import type { Note } from '@/src/types/note'
-  import NoteForm from '../components/NoteForm.svelte'
-  const notesQuery = useInfiniteNotes()
-  let selectedNote: Note | null = null
+  let unsubscribe: () => void
+  let search = ''
+  unsubscribe = searchTerm.subscribe((val) => {
+    search = val
+  })
+  onDestroy(() => unsubscribe())
+  console.log('search reachjing dashboarad')
+  const notesQuery = useInfiniteNotes(20, search)
 </script>
 
 <div class="flex flex-row">
-  <aside class="w-56 border h-[calc(100vh-10vh)] bg-white">
+  <aside class="w-56 hidden lg:block border lg:h-[calc(100vh-10vh)] bg-white">
     <div class="text-3xl my-4 text-center text-muted-foreground/50 font-black">
       LOGO
     </div>
@@ -20,31 +27,14 @@
       </div>
     </div>
   </aside>
-  <main
-    class="w-full min-h-full p-4 max-h-[calc(100vh-10vh)] overflow-y-scroll"
-  >
+  <main class="w-full min-h-full p-4 max-h-[calc(100vh-10vh)] overflow-y-auto">
     <div
       class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
     >
       {#if $notesQuery.data}
         {#each $notesQuery.data.pages as page}
           {#each page.notes as note}
-            <div
-              class="break-inside-avoid rounded-2xl p-4 shadow-md relative group"
-              style="background-color: {note.color}"
-            >
-              <div
-                class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-              >
-                <NoteForm mode="edit" initialData={note} />
-              </div>
-              <h2 class="mb-2 text-lg font-semibold">{note.title}</h2>
-              <p
-                class="max-h-[calc(100vh-50vh)] overflow-y-auto scrollbar scrollbar-thumb-black text-sm text-gray-700"
-              >
-                {note.content}
-              </p>
-            </div>
+            <NoteCard {note} />
           {/each}
         {/each}
       {/if}

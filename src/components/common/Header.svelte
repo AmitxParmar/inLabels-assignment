@@ -2,37 +2,38 @@
   import { Search } from '@lucide/svelte'
   import { Input } from '../ui/input'
   import NoteForm from '../NoteForm.svelte'
+  import { searchTerm } from '../../../src/stores/search'
 
   let searchQuery = ''
 
   function handleSearch() {
-    console.log('Searching for:', searchQuery)
+    console.log(searchQuery)
+    searchTerm.set(searchQuery)
   }
 </script>
 
 <header
-  class="p-4 border-b-8 flex items-center justify-center h-[10vh] bg-card"
+  class="lg:p-4 min-w-full w-full border-b-8 flex lg:items-center lg:justify-center h-[10vh] bg-card"
 >
-  <div class="container mx-auto flex items-center px-8">
-    <div class="text-2xl text-muted-foreground font-bold">LOGO</div>
-    <form on:submit|preventDefault={handleSearch} class="mx-8">
-      <div class="relative max-w-md">
-        <Search
-          class="absolute text-black left-3 top-1/2 transform -translate-y-1/2 w-4 h-4"
-        />
-        <Input
-          type="text"
-          name="search"
-          placeholder="Search for notes..."
-          class="pl-10 w-full h-12 rounded-md shadow-none text-black"
-          bind:value={searchQuery}
-        />
-      </div>
-    </form>
-    <div
-      class="relative flex flex-row items-center shadow-xs transition-all rounded-sm justify-center h-12 px-1 bg-white border min-w-3xl"
-    >
-      <NoteForm />
+  <div class="text-2xl text-muted-foreground hidden lg:block font-bold">
+    LOGO
+  </div>
+  <div
+    class="flex-1 w-1/2 flex flex-row gap-4 items-center justify-start px-2 lg:px-8"
+  >
+    <div class="relative lg:max-w-2xl">
+      <Search
+        class="absolute text-black left-3 top-1/2 transform -translate-y-1/2 w-4 h-4"
+      />
+      <Input
+        type="text"
+        name="search"
+        placeholder="Search for notes..."
+        class="pl-10 w-full h-12 rounded-md shadow-none text-black"
+        bind:value={searchQuery}
+        oninput={handleSearch}
+      />
     </div>
+    <NoteForm />
   </div>
 </header>

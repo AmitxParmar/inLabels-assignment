@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Pen } from '@lucide/svelte'
+  import { Pencil } from '@lucide/svelte'
   import { Dialog, DialogContent, Trigger } from './ui/dialog'
   import { Input } from './ui/input'
   import { Textarea } from './ui/textarea'
@@ -39,9 +39,22 @@
 
   // Local validation errors
   let validationErrors: Partial<Record<keyof typeof noteData, string[]>> = {}
-
+  let isOpen = false
+  // hooks to create and update api calls
   const createNote = useCreateNote()
   const updateNote = useUpdateNote()
+
+  // handle data in edit mode
+  $: if (isOpen && mode === 'edit' && initialData) {
+    noteData = {
+      title: initialData.title || '',
+      content: initialData.content || '',
+      color: (initialData.color as typeof noteData.color) || '#F8F9FA',
+      category: initialData.category || 'work',
+      isPinned: initialData.isPinned || false,
+    }
+    validationErrors = {}
+  }
 
   function validateField(field: keyof typeof noteData) {
     const result = formSchema.safeParse(noteData)
@@ -79,18 +92,21 @@
     try {
       if (mode === 'create') {
         await $createNote.mutateAsync(noteData)
-      } else if (mode === 'edit' && initialData) {
+        // Only reset form after successful creation
+        noteData = {
+          title: '',
+          content: '',
+          color: '#F8F9FA',
+          category: 'work',
+          isPinned: false,
+        }
+      } else if (mode === 'edit' && initialData?.id) {
         await $updateNote.mutateAsync({ id: initialData.id, data: noteData })
+        // Don't reset form data in edit mode - keep the current values
       }
-      // Reset form after successful submission
-      noteData = {
-        title: '',
-        content: '',
-        color: '#F8F9FA',
-        category: 'work',
-        isPinned: false,
-      }
+
       validationErrors = {}
+      isOpen = false
     } catch (error) {
       console.error('Error saving note:', error)
     }
@@ -106,21 +122,23 @@
     noteData.title.trim().length >= 2 && noteData.content.trim().length >= 5
 </script>
 
-<Dialog>
-  <Trigger class="w-full">
+<Dialog bind:open={isOpen}>
+  <Trigger class="w-full z-100">
     {#if mode === 'create'}
       <Button
-        class="flex flex-row items-center justify-start gap-2 cursor-text hover:bg-accent shadow-none text-muted-foreground min-w-full bg-white"
+        class="flex group h-12 border w-full max-w-56 flex-row items-center justify-start gap-2 cursor-text hover:bg-accent shadow-none text-muted-foreground  bg-white transition-colors duration-200"
       >
-        <Pen class="text-muted-foreground w-4 h-4" />
-        <span>Add note...</span>
+        <Pencil
+          class="text-muted-foreground group-hover:text-foreground w-4 h-4 transition-colors duration-200"
+        />
+        <span class="transition-colors duration-200">Add note...</span>
       </Button>
     {:else}
       <Button
-        class="flex flex-row items-center justify-start gap-2 hover:bg-accent shadow-none text-muted-foreground"
+        size="icon"
+        class="border size-12 p-0.5 shadow-sm cursor-pointer hover:bg-accent rounded-full hover:text-black"
       >
-        <Pen class="text-muted-foreground w-4 h-4" />
-        <span>Edit</span>
+        <Pencil class="" />
       </Button>
     {/if}
   </Trigger>
@@ -188,36 +206,13 @@
             </SelectTrigger>
             <SelectContent>
               <div>
-                <SelectItem
-                  value="#F8F9FA"
-                  style={{ backgroundColor: colors.lightGray }}
-                  >Light Gray</SelectItem
-                >
-                <SelectItem
-                  value="#FFF3BF"
-                  style={{ backgroundColor: colors.softYellow }}
-                  >Soft Yellow</SelectItem
-                >
-                <SelectItem
-                  value="#D3F9D8"
-                  style={{ backgroundColor: colors.softGreen }}
-                  >Soft Green</SelectItem
-                >
-                <SelectItem
-                  value="#FFE3E3"
-                  style={{ backgroundColor: colors.softRed }}
-                  >Soft Red</SelectItem
-                >
-                <SelectItem
-                  value="#E7F5FF"
-                  style={{ backgroundColor: colors.softBlue }}
-                  >Soft Blue</SelectItem
-                >
-                <SelectItem
-                  value="#F3F0FF"
-                  style={{ backgroundColor: colors.softPurple }}
-                  >Soft Purple</SelectItem
-                >
+                {#each Object.entries(colors) as [key, color]}
+                  <SelectItem value={color} style={{ backgroundColor: color }}>
+                    {key
+                      .replace(/([A-Z])/g, ' $1')
+                      .replace(/^./, (str) => str.toUpperCase())}
+                  </SelectItem>
+                {/each}
               </div>
             </SelectContent>
           </Select>

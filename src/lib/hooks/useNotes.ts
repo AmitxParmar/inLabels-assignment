@@ -28,6 +28,8 @@ export function useInfiniteNotes(limit = 20, search = '') {
     getNextPageParam: (lastPage) =>
       lastPage.hasNextPage ? lastPage.page + 1 : undefined,
     initialPageParam: 1,
+    staleTime: 30000, // 30 seconds debounce
+    gcTime: 5 * 60 * 1000, // 5 minutes cache time
   })
 }
 
