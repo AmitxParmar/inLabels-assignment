@@ -6,6 +6,7 @@
   import { Trash } from '@lucide/svelte'
   import { Dialog, DialogContent, Trigger } from './ui/dialog'
   import { cn, formatDate } from '$lib/utils'
+  import { toast } from 'svelte-sonner'
   // Only create the mutation once per component instance
   const deleteMutation = useDeleteNote()
 
@@ -14,7 +15,11 @@
   // Use a stable function reference for event handler
   function handleDelete() {
     if (note.id) {
-      $deleteMutation.mutate(note.id)
+      $deleteMutation.mutate(note.id, {
+        onSuccess: () => {
+          toast.error('Note deleted successfully!')
+        },
+      })
       isOpen = false
     }
   }

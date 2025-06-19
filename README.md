@@ -4,6 +4,15 @@ A minimal template to get started with Svelte and TypeScript using Vite.
 
 ---
 
+## Features
+
+- **CRUD Notes**: Create, read, update, and delete notes.
+- **Sort**: Sort notes by different fields and order.
+- **Search**: Search notes by title or content.
+- **Infinite Scroll**: Seamlessly load more notes as you scroll.
+
+---
+
 ## How to Run the App
 
 1. **Install pnpm (if you don't have it):**

@@ -6,6 +6,7 @@
   import { sortOptions, type SortOptions } from '../stores/sort'
   import { onDestroy } from 'svelte'
   import { Skeleton } from '../components/ui/skeleton'
+  import { Button } from '../components/ui/button'
 
   let unsubscribe: () => void
   let unsubscribeSort: () => void
@@ -49,10 +50,10 @@
       <Sort />
     </div>
     <main
-      class="w-full min-h-full p-4 max-h-[calc(100vh-20vh)] overflow-y-auto"
+      class="w-full min-h-full p-4 pb-28 max-h-[calc(100vh-20vh)] overflow-y-auto"
     >
       <div
-        class="grid grid-cols-1 mb-18 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
       >
         {#if $notesQuery.isLoading}
           {#each Array(8)}
@@ -68,10 +69,10 @@
       </div>
 
       {#if $notesQuery.hasNextPage}
-        <div class="flex justify-center mt-8">
-          <button
-            class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            on:click={() => $notesQuery.fetchNextPage()}
+        <div class="flex mt-6 justify-center">
+          <Button
+            class="cursor-pointer rounded-none border-4 border-muted-foreground"
+            onclick={() => $notesQuery.fetchNextPage()}
             disabled={$notesQuery.isFetchingNextPage}
           >
             {#if $notesQuery.isFetchingNextPage}
@@ -79,7 +80,7 @@
             {:else}
               Load More
             {/if}
-          </button>
+          </Button>
         </div>
       {/if}
     </main>

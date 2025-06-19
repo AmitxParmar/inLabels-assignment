@@ -16,6 +16,8 @@
   import { colors } from '$lib/utils'
   import { useCreateNote, useUpdateNote } from '$lib/hooks/useNotes'
   import type { Note } from '@/src/types/note'
+  import { Label } from './ui/label'
+  import { toast } from 'svelte-sonner'
 
   export let mode: 'create' | 'edit' = 'create'
   export let initialData: Note | null = null
@@ -91,7 +93,11 @@
 
     try {
       if (mode === 'create') {
-        await $createNote.mutateAsync(noteData)
+        await $createNote.mutateAsync(noteData, {
+          onSuccess: () => {
+            toast.success('Note created successfully!')
+          },
+        })
         // Only reset form after successful creation
         noteData = {
           title: '',
@@ -101,7 +107,14 @@
           isPinned: false,
         }
       } else if (mode === 'edit' && initialData?.id) {
-        await $updateNote.mutateAsync({ id: initialData.id, data: noteData })
+        await $updateNote.mutateAsync(
+          { id: initialData.id, data: noteData },
+          {
+            onSuccess: () => {
+              toast.success('Note updated successfully!')
+            },
+          }
+        )
         // Don't reset form data in edit mode - keep the current values
       }
 
@@ -147,12 +160,12 @@
     <div class="grid gap-4 py-4">
       <!-- Title -->
       <div class="space-y-2">
-        <label
+        <Label
           for="title"
           class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
         >
           Title
-        </label>
+        </Label>
         <Input
           id="title"
           bind:value={noteData.title}
@@ -167,12 +180,12 @@
 
       <!-- Content -->
       <div class="space-y-2">
-        <label
+        <Label
           for="content"
           class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
         >
           Content
-        </label>
+        </Label>
         <Textarea
           id="content"
           bind:value={noteData.content}
@@ -188,12 +201,12 @@
       <div class="grid grid-cols-2 gap-2">
         <!-- Color -->
         <div class="space-y-2 w-full">
-          <label
+          <Label
             for="color"
             class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
           >
             Color
-          </label>
+          </Label>
           <Select bind:value={noteData.color} type="single">
             <SelectTrigger class="w-full bg-secondary">
               <SelectLabel>
@@ -223,12 +236,12 @@
 
         <!-- Category -->
         <div class="space-y-2">
-          <label
+          <Label
             for="category"
             class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
           >
             Category
-          </label>
+          </Label>
           <Select bind:value={noteData.category} type="single">
             <SelectTrigger class="w-full bg-secondary">
               <SelectLabel>
