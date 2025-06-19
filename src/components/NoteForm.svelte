@@ -136,7 +136,7 @@
     {:else}
       <Button
         size="icon"
-        class="border size-12 p-0.5 shadow-sm cursor-pointer hover:bg-accent rounded-full hover:text-black"
+        class="border-2 border-muted-foreground size-10 p-0.5 shadow-sm cursor-pointer hover:bg-accent rounded-full hover:text-black"
       >
         <Pencil class="" />
       </Button>

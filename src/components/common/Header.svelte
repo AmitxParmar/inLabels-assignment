@@ -29,7 +29,7 @@
         type="text"
         name="search"
         placeholder="Search for notes..."
-        class="pl-10 w-full h-12 rounded-md shadow-none text-black"
+        class="pl-10 w-full h-12 rounded-md shadow-none placeholder:text-sm placeholder:font-semibold align-middle text-black"
         bind:value={searchQuery}
         oninput={handleSearch}
       />

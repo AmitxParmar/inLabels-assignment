@@ -15,10 +15,12 @@ export class NotesApi {
   static async getNotes(
     page = 1,
     limit = 10,
-    search = ''
+    search = '',
+    sortBy = 'createdAt',
+    order = 'desc'
   ): Promise<GetNotesResponse> {
     try {
-      let url = `${BASE_URL}/notes?page=${page}&limit=${limit}&sortBy=createdAt&order=desc`
+      let url = `${BASE_URL}/notes?page=${page}&limit=${limit}&sortBy=${sortBy}&order=${order}`
 
       if (search) {
         url += `&search=${encodeURIComponent(search)}`
@@ -41,7 +43,6 @@ export class NotesApi {
       throw error
     }
   }
-
   /**
    * Create a new note
    */

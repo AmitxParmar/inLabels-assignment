@@ -13,18 +13,29 @@ type NotesResponse = {
   hasNextPage: boolean
 }
 
-export function useNotes(page = 1, limit = 20, search = '') {
+export function useNotes(
+  page = 1,
+  limit = 20,
+  search = '',
+  sortBy = 'title',
+  order = 'asc'
+) {
   return createQuery<NotesResponse>({
-    queryKey: ['notes', page, limit, search],
-    queryFn: () => NotesApi.getNotes(page, limit, search),
+    queryKey: ['notes', page, limit, search, sortBy, order],
+    queryFn: () => NotesApi.getNotes(page, limit, search, sortBy, order),
   })
 }
 
-export function useInfiniteNotes(limit = 20, search = '') {
+export function useInfiniteNotes(
+  limit = 20,
+  search = '',
+  sortBy = 'title',
+  order = 'asc'
+) {
   return createInfiniteQuery<NotesResponse>({
-    queryKey: ['notes', limit, search],
+    queryKey: ['notes', limit, search, sortBy, order],
     queryFn: ({ pageParam = 1 }) =>
-      NotesApi.getNotes(Number(pageParam), limit, search),
+      NotesApi.getNotes(Number(pageParam), limit, search, sortBy, order),
     getNextPageParam: (lastPage) =>
       lastPage.hasNextPage ? lastPage.page + 1 : undefined,
     initialPageParam: 1,
